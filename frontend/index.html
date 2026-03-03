@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amazon Hub — Centro de Distribución</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── BARRA SUPERIOR ───────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">AMAZON</div>
+      <div>
+        <div class="brand-name">Hub Distribution Center</div>
+        <div class="brand-sub">Pasto, Colombia · Nodo 07</div>
+      </div>
+    </div>
+
+    <div class="topbar-stats">
+      <div class="tstat"><span class="tstat-v" id="ts-cola">0</span><span class="tstat-l">En Cola</span></div>
+      <div class="tstat"><span class="tstat-v" id="ts-camion">0</span><span class="tstat-l">En Camión</span></div>
+      <div class="tstat"><span class="tstat-v" id="ts-camino">0</span><span class="tstat-l">En Camino</span></div>
+      <div class="tstat delivered"><span class="tstat-v" id="ts-entregados">0</span><span class="tstat-l">Entregados</span></div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+  </header>
+
+  <!-- ── NAVEGACIÓN LATERAL ────────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="nav-section">Operaciones</div>
+    <button class="nav-item active" data-panel="recibir">
+      <span class="nav-ico">📥</span> Recibir Pedido
+    </button>
+    <button class="nav-item" data-panel="cola">
+      <span class="nav-ico">🔢</span> Cola
+      <span class="nav-badge" id="nb-cola">0</span>
+    </button>
+    <button class="nav-item" data-panel="camion">
+      <span class="nav-ico">🚚</span> Camión
+      <span class="nav-badge" id="nb-camion">0</span>
+    </button>
+
+    <div class="nav-section">Almacén</div>
+    <button class="nav-item" data-panel="almacen">
+      <span class="nav-ico">🏭</span> Inventario
+    </button>
+
+    <div class="nav-section">Seguimiento</div>
+    <button class="nav-item" data-panel="tracking">
+      <span class="nav-ico">📍</span> Rastrear Paquete
+    </button>
+    <button class="nav-item" data-panel="historial">
+      <span class="nav-ico">📋</span> Historial
+    </button>
+  </nav>
+
+  <!-- ── CONTENIDO PRINCIPAL ──────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Panel: Recibir pedido -->
+    <div class="panel active" id="panel-recibir">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">RECIBIR <em>PEDIDO</em></h1>
+          <p class="panel-desc">// Cola FIFO — orden de llegada</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="f-dest">Nombre destinatario</label>
+          <input class="form-input" id="f-dest" type="text" placeholder="ej: Carlos Muñoz" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-tel">Teléfono</label>
+          <input class="form-input" id="f-tel" type="text" placeholder="ej: 311 234 5678" />
+        </div>
+        <div class="form-group span2">
+          <label class="form-label" for="f-dir">Dirección de entrega</label>
+          <input class="form-input" id="f-dir" type="text" placeholder="ej: Cra 5 #12-30, Pasto, Nariño" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-cat">Categoría</label>
+          <select class="form-select" id="f-cat">
+            <option value="electronica">📱 Electrónica</option>
+            <option value="ropa">👕 Ropa</option>
+            <option value="alimentos">🥦 Alimentos</option>
+            <option value="juguetes">🧸 Juguetes</option>
+            <option value="libros">📚 Libros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-peso">Peso (kg)</label>
+          <input class="form-input" id="f-peso" type="number" placeholder="2.5" min="0.1" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-desc">Descripción del producto</label>
+          <input class="form-input" id="f-desc" type="text" placeholder="ej: Audífonos Sony WH-1000XM5" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-prio">Prioridad</label>
+          <select class="form-select" id="f-prio">
+            <option value="normal">Normal</option>
+            <option value="express">⚡ Express</option>
+            <option value="fragil">🔴 Frágil</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-amz" id="btn-recibir">📥 Registrar Pedido</button>
+        <button class="btn btn-ghost" id="btn-limpiar">↺ Limpiar</button>
+      </div>
+    </div>
+
+    <!-- Panel: Cola -->
+    <div class="panel" id="panel-cola">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">COLA DE <em>PEDIDOS</em></h1>
+          <p class="panel-desc">// FIFO — primer llegado, primer despachado</p>
+        </div>
+        <div class="btn-row no-mb">
+          <button class="btn btn-cyan btn-sm" id="btn-cargar-camion">⬆ Cargar al camión</button>
+          <button class="btn btn-danger btn-sm" id="btn-vaciar-cola">🗑 Vaciar cola</button>
+        </div>
+      </div>
+      <div id="lista-cola"><div class="empty-state"><span class="empty-ico">📭</span><span class="empty-txt">Cola vacía</span></div></div>
+    </div>
+
+    <!-- Panel: Camión -->
+    <div class="panel" id="panel-camion">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">CAMIÓN <em>ACTIVO</em></h1>
+          <p class="panel-desc">// Pila LIFO — último cargado, primero entregado</p>
+        </div>
+        <div class="btn-row no-mb">
+          <button class="btn btn-amz btn-sm" id="btn-salir-ruta">🚚 Salir a Ruta</button>
+          <button class="btn btn-cyan btn-sm" id="btn-cargar-desde-cola">📥 Cargar desde cola</button>
+        </div>
+      </div>
+
+      <!-- Visualización slots del camión -->
+      <div class="truck-viz">
+        <div class="truck-header">
+          <span class="truck-label">Slots de carga (tope → fondo)</span>
+          <span class="truck-cap-txt" id="truck-cap-txt">0 / 5 paquetes</span>
+        </div>
+        <div class="truck-slots" id="truck-slots"></div>
+        <div class="cap-bar"><div class="cap-fill" id="cap-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="section-divider"><span>Carga detallada</span></div>
+      <div id="lista-camion"><div class="empty-state"><span class="empty-ico">🚛</span><span class="empty-txt">Camión vacío</span></div></div>
+
+      <div class="section-divider" id="div-en-camino" style="display:none"><span>En Camino — Pendientes de entrega</span></div>
+      <div id="lista-en-camino"></div>
+    </div>
+
+    <!-- Panel: Almacén -->
+    <div class="panel" id="panel-almacen">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">INVENTARIO <em>ALMACÉN</em></h1>
+          <p class="panel-desc">// Array estático — pasillos físicos fijos por categoría</p>
+        </div>
+      </div>
+      <div class="almacen-grid" id="almacen-grid"></div>
+    </div>
+
+    <!-- Panel: Tracking -->
+    <div class="panel" id="panel-tracking">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">RASTREAR <em>PAQUETE</em></h1>
+          <p class="panel-desc">// Historial completo de eventos</p>
+        </div>
+      </div>
+      <div class="tracking-search">
+        <input class="form-input" id="inp-track" placeholder="ID del paquete (ej: PKG-001)" />
+        <button class="btn btn-amz" id="btn-rastrear">Rastrear</button>
+      </div>
+      <div id="track-result"></div>
+    </div>
+
+    <!-- Panel: Historial -->
+    <div class="panel" id="panel-historial">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">HISTORIAL <em>COMPLETO</em></h1>
+          <p class="panel-desc">// Todos los paquetes del sistema</p>
+        </div>
+      </div>
+      <div class="hist-filters" id="hist-filters">
+        <button class="filter-btn active" data-filter="todos">Todos</button>
+        <button class="filter-btn" data-filter="en_cola">En Cola</button>
+        <button class="filter-btn" data-filter="en_camion">En Camión</button>
+        <button class="filter-btn" data-filter="en_camino">En Camino</button>
+        <button class="filter-btn" data-filter="entregado">Entregados</button>
+      </div>
+      <div id="lista-historial"></div>
+    </div>
+
+  </main>
+
+  <!-- ── TERMINAL DE EVENTOS ───────────────────────────────────────── -->
+  <aside class="log-panel">
+    <div class="log-head">
+      <div class="log-title"><div class="live-dot"></div>Terminal de Eventos</div>
+      <button class="btn btn-danger btn-sm" id="btn-clear-log">Limpiar</button>
+    </div>
+    <div class="log-entries" id="log-entries"></div>
+  </aside>
+
+</div><!-- /layout -->
+
+<!-- ── MODAL CONFIRMACIÓN DE ENTREGA ────────────────────────────── -->
+<div class="modal-overlay" id="modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 class="modal-title">CONFIRMAR <em>ENTREGA</em></h2>
+    <p class="modal-sub" id="modal-sub"></p>
+    <div class="modal-pkg" id="modal-pkg-info"></div>
+    <p class="firma-label">✏ Firma del destinatario</p>
+    <canvas class="firma-pad" id="firma-canvas" width="360" height="90" aria-label="Área de firma"></canvas>
+    <div class="firma-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-clear-firma">↺ Borrar firma</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
+      <button class="btn btn-green" id="btn-confirmar-entrega">✓ Confirmar entrega</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast de notificaciones -->
+<div id="toast" role="alert" aria-live="polite"></div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
