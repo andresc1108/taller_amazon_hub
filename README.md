@@ -17,25 +17,25 @@ estructuras de datos principales:
 ```
 amazon_hub/
 │
-├── app.py                      ← Servidor Flask (API REST)
+├── app.py                       Servidor Flask (API REST)
 ├── requirements.txt
 │
 ├── backend/
 │   ├── models/
-│   │   └── paquete.py          ← Clase Paquete
+│   │   └── paquete.py           Clase Paquete
 │   └── structures/
-│       ├── cola.py             ← Cola FIFO
-│       ├── pila.py             ← Pila LIFO
-│       └── almacen.py          ← Array de pasillos
+│       ├── cola.py              Cola FIFO
+│       ├── pila.py              Pila LIFO
+│       └── almacen.py           Array de pasillos
 │
 └── frontend/
-    ├── index.html              ← Interfaz principal
+    ├── index.html               Interfaz principal
     ├── css/
-    │   └── styles.css          ← Estilos
+    │   └── styles.css           Estilos
     └── js/
-        ├── api.js              ← Comunicación con la API
-        ├── ui.js               ← Renderizado de componentes
-        └── app.js              ← Controlador principal
+        ├── api.js               Comunicación con la API
+        ├── ui.js                Renderizado de componentes
+        └── app.js               Controlador principal
 ```
 
 ---
@@ -64,7 +64,7 @@ http://localhost:5000
 ```
 [Recibir Pedido]
       ↓
-  Cola FIFO          ← Almacén (array)
+  Cola FIFO           Almacén (array)
       ↓
 [Cargar al camión]
       ↓
