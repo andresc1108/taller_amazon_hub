@@ -54,9 +54,12 @@ const App = (() => {
   }
 
   function goTrack(id) {
-    document.getElementById("inp-track").value = id;
     document.querySelector('[data-panel="tracking"]').click();
-    _trackPkg();
+    // Esperar a que el panel sea visible antes de buscar
+    setTimeout(() => {
+      document.getElementById("inp-track").value = id;
+      _trackPkg();
+    }, 50);
   }
 
   // ── Formulario — Recibir pedido ───────────────────────────────────
@@ -178,6 +181,17 @@ const App = (() => {
 
   async function _confirmarEntrega() {
     if (!_pkgParaEntregar) return;
+
+    // Verificar que la firma no esté vacía
+    if (!_firmaValida()) {
+      UI.toast("Por favor, el destinatario debe firmar antes de confirmar", "warn");
+      // Resaltar el canvas para llamar la atención
+      const c = document.getElementById("firma-canvas");
+      c.style.borderColor = "var(--red)";
+      setTimeout(() => (c.style.borderColor = ""), 2000);
+      return;
+    }
+
     const res = await API.confirmarEntrega(_pkgParaEntregar.id);
     if (!res.ok) { UI.toast(res.error, "err"); return; }
 
@@ -191,6 +205,18 @@ const App = (() => {
     if (_activePanel === "tracking")  _trackPkg();
   }
 
+  function _firmaValida() {
+    const c = document.getElementById("firma-canvas");
+    if (!c || !_firmaCtx) return false;
+
+    // Revisar si algún pixel del canvas tiene contenido (alpha > 0)
+    const pixels = _firmaCtx.getImageData(0, 0, c.width, c.height).data;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] > 0) return true; // encontró un pixel dibujado
+    }
+    return false;
+  }
+
   function _cerrarModal() {
     document.getElementById("modal").setAttribute("aria-hidden", "true");
     _pkgParaEntregar = null;
@@ -199,31 +225,70 @@ const App = (() => {
   // ── Firma digital ─────────────────────────────────────────────────
 
   function _initFirma() {
-    const c      = document.getElementById("firma-canvas");
-    _firmaCtx    = c.getContext("2d");
-    _clearFirma();
-    _firmaCtx.strokeStyle = "#ff9900";
-    _firmaCtx.lineWidth   = 2.5;
-    _firmaCtx.lineCap     = "round";
-    _firmaCtx.lineJoin    = "round";
+    const c = document.getElementById("firma-canvas");
 
-    const getPos = (ev) => {
-      const r = c.getBoundingClientRect();
-      const s = ev.touches ? ev.touches[0] : ev;
-      return [s.clientX - r.left, s.clientY - r.top];
-    };
+    // Esperar un frame para que el modal esté completamente visible
+    // y getBoundingClientRect() devuelva dimensiones reales
+    requestAnimationFrame(() => {
+      const dpr  = window.devicePixelRatio || 1;
+      const rect = c.getBoundingClientRect();
 
-    c.onmousedown  = e => { _firmaPintando = true; _firmaCtx.beginPath(); _firmaCtx.moveTo(...getPos(e)); };
-    c.onmousemove  = e => { if (!_firmaPintando) return; _firmaCtx.lineTo(...getPos(e)); _firmaCtx.stroke(); };
-    c.onmouseup    = () => (_firmaPintando = false);
-    c.onmouseleave = () => (_firmaPintando = false);
-    c.ontouchstart = e => { e.preventDefault(); _firmaPintando = true; _firmaCtx.beginPath(); _firmaCtx.moveTo(...getPos(e)); };
-    c.ontouchmove  = e => { e.preventDefault(); if (!_firmaPintando) return; _firmaCtx.lineTo(...getPos(e)); _firmaCtx.stroke(); };
-    c.ontouchend   = () => (_firmaPintando = false);
+      // Evitar inicializar con dimensiones 0 si el modal aún no es visible
+      if (rect.width === 0) return;
+
+      c.width  = rect.width  * dpr;
+      c.height = rect.height * dpr;
+
+      _firmaCtx = c.getContext("2d");
+      _firmaCtx.scale(dpr, dpr);
+      _firmaCtx.strokeStyle = "#ff9900";
+      _firmaCtx.lineWidth   = 2.5;
+      _firmaCtx.lineCap     = "round";
+      _firmaCtx.lineJoin    = "round";
+      _clearFirma();
+
+      // Calcula la posición correcta del toque/click relativa al canvas
+      const getPos = (ev) => {
+        const r = c.getBoundingClientRect();
+        const s = ev.touches ? ev.touches[0] : ev;
+        return [s.clientX - r.left, s.clientY - r.top];
+      };
+
+      // Eventos de mouse (PC)
+      c.onmousedown  = e => { _firmaPintando = true; _firmaCtx.beginPath(); _firmaCtx.moveTo(...getPos(e)); };
+      c.onmousemove  = e => { if (!_firmaPintando) return; _firmaCtx.lineTo(...getPos(e)); _firmaCtx.stroke(); };
+      c.onmouseup    = () => (_firmaPintando = false);
+      c.onmouseleave = () => (_firmaPintando = false);
+
+      // Eventos de toque (móvil/tablet)
+      // Se usa addEventListener con { passive: false } para poder llamar preventDefault()
+      // y evitar que el scroll de la página interfiera con la firma
+      c.addEventListener("touchstart", e => {
+        e.preventDefault();
+        _firmaPintando = true;
+        _firmaCtx.beginPath();
+        _firmaCtx.moveTo(...getPos(e));
+      }, { passive: false });
+
+      c.addEventListener("touchmove", e => {
+        e.preventDefault();
+        if (!_firmaPintando) return;
+        _firmaCtx.lineTo(...getPos(e));
+        _firmaCtx.stroke();
+      }, { passive: false });
+
+      c.addEventListener("touchend",    () => (_firmaPintando = false), { passive: true });
+      c.addEventListener("touchcancel", () => (_firmaPintando = false), { passive: true });
+    });
   }
 
   function _clearFirma() {
-    if (_firmaCtx) _firmaCtx.clearRect(0, 0, 360, 90);
+    if (_firmaCtx) {
+      const c = document.getElementById("firma-canvas");
+      // Limpiar en coordenadas lógicas (sin multiplicar por dpr)
+      const dpr = window.devicePixelRatio || 1;
+      _firmaCtx.clearRect(0, 0, c.width / dpr, c.height / dpr);
+    }
   }
 
   // ── Tracking ─────────────────────────────────────────────────────
@@ -294,6 +359,9 @@ const App = (() => {
     };
     setInterval(tick, 1000);
     tick();
+
+    // Refrescar stats automáticamente cada 30 segundos
+    setInterval(_refreshStats, 30000);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ API REST que conecta el frontend con las estructuras de datos del backend.
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from typing import Optional
 import os
 
 from backend.models.paquete       import Paquete
@@ -42,7 +43,7 @@ def _error(msg: str, code: int = 400):
     return jsonify({"ok": False, "error": msg}), code
 
 
-def _ok(data: dict = None):
+def _ok(data: Optional[dict] = None):
     return jsonify({"ok": True, **(data or {})})
 
 

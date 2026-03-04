@@ -673,7 +673,7 @@ body::after {
 }
 
 .firma-label { font-size: 11px; color: var(--t3); font-family: var(--mono); margin-bottom: 8px; }
-.firma-pad   { border: 2px dashed var(--border2); border-radius: 8px; background: var(--s1); display: block; cursor: crosshair; width: 100%; }
+.firma-pad   { border: 2px dashed var(--border2); border-radius: 8px; background: var(--s1); display: block; cursor: crosshair; width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
 .firma-actions { display: flex; justify-content: flex-end; margin: 8px 0 16px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
