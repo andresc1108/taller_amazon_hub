@@ -39,13 +39,14 @@
 
 /* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; }
 
 body {
   background: var(--bg);
   color: var(--t1);
   font-family: var(--body);
   font-size: 14px;
+  overflow-x: hidden;
 }
 
 /* Textura de ruido sutil */
@@ -64,6 +65,7 @@ body::after {
   grid-template-columns: 220px 1fr 300px;
   grid-template-rows: 56px 1fr;
   height: 100vh;
+  min-height: 100vh;
 }
 
 /* ── Topbar ─────────────────────────────────────────────── */
@@ -73,11 +75,14 @@ body::after {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  gap: 12px;
   border-bottom: 1px solid var(--border);
   background: rgba(6, 6, 8, 0.95);
   backdrop-filter: blur(20px);
   position: relative;
   z-index: 100;
+  flex-wrap: wrap;
+  min-height: 56px;
 }
 
 .topbar::after {
@@ -129,6 +134,7 @@ body::after {
   gap: 2px;
   overflow-y: auto;
   background: var(--s1);
+  transition: transform .3s ease;
 }
 
 .nav-section {
@@ -185,7 +191,7 @@ body::after {
 }
 
 /* ── Main ────────────────────────────────────────────────── */
-.main { overflow-y: auto; background: var(--bg); }
+.main { overflow-y: auto; background: var(--bg); min-width: 0; }
 
 .panel { display: none; padding: 24px; animation: fadeUp .25s ease; }
 .panel.active { display: block; }
@@ -197,7 +203,7 @@ body::after {
 
 .panel-head {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
@@ -699,3 +705,152 @@ body::after {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVIDAD
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Tablet (≤ 1024px): ocultar log panel ───────────────── */
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: 56px 1fr;
+    height: 100vh;
+  }
+
+  .log-panel { display: none; }
+
+  .topbar-stats { gap: 0; }
+  .tstat { padding: 6px 10px; }
+  .tstat-v { font-size: 15px; }
+  .clock { display: none; }
+}
+
+/* ── Tablet pequeña (≤ 768px): sidebar como drawer ─────── */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  /* Topbar apilada en móvil */
+  .topbar {
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: auto;
+  }
+
+  .brand-sub { display: none; }
+
+  .topbar-stats {
+    order: 3;
+    width: 100%;
+    justify-content: space-around;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    padding-bottom: 4px;
+  }
+
+  .tstat { border-left: none; padding: 4px 8px; }
+  .tstat-v { font-size: 16px; }
+
+  /* Sidebar se convierte en barra de navegación horizontal */
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 12px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .nav-section { display: none; }
+
+  .nav-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 12px;
+    font-size: 10px;
+    min-width: fit-content;
+    border-radius: var(--radius);
+  }
+
+  .nav-item.active::before { display: none; }
+  .nav-item.active {
+    border-bottom: 2px solid var(--amz);
+    border-radius: 0;
+  }
+
+  .nav-ico { font-size: 18px; min-width: auto; }
+  .nav-badge { margin-left: 0; font-size: 8px; }
+
+  /* Main ocupa todo el ancho */
+  .main { min-height: 60vh; }
+
+  /* Panel con menos padding */
+  .panel { padding: 16px; }
+
+  /* Form de 1 columna en móvil */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.span2 { grid-column: 1; }
+
+  /* Panel head apilado */
+  .panel-title { font-size: 26px; }
+
+  /* Almacén de 1 columna */
+  .almacen-grid { grid-template-columns: 1fr; }
+
+  /* Truck slots más pequeños */
+  .truck-slots { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .truck-slot .slot-ico { font-size: 12px; }
+  .truck-slot .slot-id  { font-size: 7px; }
+
+  /* Modal más angosto */
+  .modal { width: 95vw; padding: 20px; }
+  .firma-pad { height: 70px; }
+
+  /* Timeline en móvil */
+  .timeline { padding: 10px 8px; }
+  .tl-label { font-size: 7px; }
+  .tl-line  { max-width: 20px; }
+
+  /* Tracking header apilado */
+  .tr-header { flex-direction: column; gap: 12px; }
+  .tr-id { font-size: 32px; }
+
+  /* Pkg card más compacta */
+  .pkg-right { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+}
+
+/* ── Móvil pequeño (≤ 480px) ────────────────────────────── */
+@media (max-width: 480px) {
+  .panel-title { font-size: 22px; }
+
+  .btn { padding: 9px 14px; font-size: 12px; }
+  .btn-sm { padding: 5px 10px; font-size: 10px; }
+
+  .btn-row { gap: 6px; }
+
+  .topbar-stats { justify-content: space-between; }
+  .tstat-v { font-size: 14px; }
+  .tstat-l { font-size: 8px; }
+
+  .pkg-card { padding: 10px 12px; gap: 10px; }
+  .pkg-name { font-size: 13px; }
+  .pkg-meta { font-size: 10px; }
+
+  .truck-slots { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+
+  .almacen-grid { grid-template-columns: 1fr; }
+
+  #toast { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
+}
